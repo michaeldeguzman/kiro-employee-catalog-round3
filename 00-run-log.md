@@ -7,6 +7,72 @@ for chronological order.
 
 ---
 
+## 2026-10-10 — Read-only verification (typecheck + live/offline test runs)
+
+A read-only check: no files modified, no commits/pushes, no OutSystems MCP or Mentor
+calls, no app changes. (The run-log/transcript/push that recorded this verification
+happened afterward, as a separate step.)
+
+### Runs (UTC)
+| Run | Started (UTC) | Result |
+|---|---|---|
+| `npm run typecheck` | 2026-10-10T06:12:30Z | pass (tsc --noEmit, exit 0) |
+| Live run #1 (`npm test`, .env as-is) | 2026-10-10T06:12:37Z | 14 passed / 3 failed / 4 skipped (+1 failed suite) |
+| Live run #2 (retry, JSON reporter) | 2026-10-10T06:13:25Z | 21 passed / 0 failed / 0 skipped |
+| Offline run (`OUTSYSTEMS_BASE_URL=""`) | 2026-10-10T06:15:25Z | 14 passed / 6 failed / 1 skipped |
+
+### Per-file results (passed / failed / skipped)
+| Test file | Live#1 | Live#2 | Offline |
+|---|---|---|---|
+| `tests/client.test.ts` | 7 / 0 / 0 | 7 / 0 / 0 | 7 / 0 / 0 |
+| `tests/create-employee.test.ts` | 5 / 1 / 0 | 6 / 0 / 0 | 1 / 5 / 0 |
+| `tests/employees.test.ts` | 2 / 1 / 0 | 3 / 0 / 0 | 2 / 1 / 0 |
+| `tests/filter-by-department.test.ts` | 0 / 0 / 4 (beforeAll hook timed out) | 4 / 0 / 0 | 4 / 0 / 0 |
+| `tests/unique-email-index.test.ts` | 0 / 1 / 0 | 1 / 0 / 0 | 0 / 0 / 1 |
+
+- **Live total:** 21/21 on the retry (run #2). Run #1's failures were all `Test timed out in 15000ms` / `Hook timed out in 10000ms` — transient latency (likely tenant cold-start), not wrong behavior or error status codes; the immediate retry passed every test.
+- **Offline total:** 14 passed / 6 failed / 1 skipped.
+- **Live-only test:** `tests/unique-email-index.test.ts` (1 test) — skipped offline by design.
+
+### Verbatim Vitest summary lines (hostnames/keys redacted — none appeared in these lines)
+Live run #1:
+```
+ Test Files  4 failed | 1 passed (5)
+      Tests  3 failed | 14 passed | 4 skipped (21)
+   Start at  17:12:38
+   Duration  22.76s (tests 100%)
+```
+Live run #2 (JSON totals): `numTotalTests=21 passed=21 failed=0 pending=0 numFailedSuites=0`
+
+Offline run:
+```
+ Test Files  2 failed | 2 passed | 1 skipped (5)
+      Tests  6 failed | 14 passed | 1 skipped (21)
+   Start at  17:15:26
+   Duration  25.26s (tests 99%, transform 1%)
+```
+
+### Findings (reported, not fixed)
+1. **Live run #1 timeouts were transient.** No HTTP status returned for the 3 timed-out
+   tests + 1 timed-out hook — the requests simply didn't finish within Vitest's timeout.
+   Retry (run #2) → 21/21. The endpoints respond correctly; first contact was slow.
+2. **Offline run has 6 real failures — a genuine finding.** With `OUTSYSTEMS_BASE_URL=""`,
+   5 tests in `create-employee.test.ts` and 1 in `employees.test.ts` failed with
+   `TypeError: fetch failed … getaddrinfo ENOTFOUND mock.local` (code `ENOTFOUND`). Those
+   tests attempted a **real network call to `mock.local`** instead of using the stubbed
+   fetch, so the offline mock fallback does not fully take effect for them. The "response"
+   is a DNS resolution failure, not an HTTP status. This contradicts the documented claim
+   that the suite passes offline in CI. `client.test.ts` (7) and `filter-by-department.test.ts`
+   (4) passed offline; `unique-email-index` skipped. NOT fixed per the read-only scope.
+
+### Environment hygiene
+- The JSON reporter wrote a `.vitest/` directory during verification; it was removed so
+  the working tree was left as found. No tracked files were modified. `git status` showed
+  only a pre-existing untracked file (`conversation-transcript-round3.md`), not created by
+  this task.
+
+---
+
 ## 2026-10-10 — Documentation sync (README + tracker/transcript consistency)
 
 - Created `README.md` (project front door): purpose, live deployment details
