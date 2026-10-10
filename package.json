@@ -1,0 +1,24 @@
+{
+  "name": "outsystems-employee-catalog-tests",
+  "version": "1.0.0",
+  "description": "Integration tests for OutSystems REST endpoints",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest --run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --run --coverage",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@vitest/coverage-v8": "^5.0.3",
+    "@vitest/ui": "^5.0.3",
+    "typescript": "^5.6.0",
+    "vitest": "^5.0.3"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5"
+  }
+}

@@ -1,0 +1,9 @@
+node_modules/
+dist/
+coverage/
+.env
+*.js.map
+.DS_Store
+
+# Conversation transcript — kept local, not published
+00-transcript.md
