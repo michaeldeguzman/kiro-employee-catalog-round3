@@ -7,8 +7,8 @@ confirm the ODC backend endpoints behave to spec. It contains pure offline unit 
 otherwise mocked), and one live-only test.
 
 The ODC application itself (entities, server actions, REST API, screens) was generated
-fresh from `brd-employee-catalog.md` via OutSystems AI Mentor Web and published to the
-Development environment.
+fresh from `brd-employee-catalog.md` through the OutSystems MCP server, which delegates
+model changes to Mentor, and published to the Development environment.
 
 ---
 

@@ -7,6 +7,25 @@ for chronological order.
 
 ---
 
+## 2026-10-10 — Doc correction: build tool description
+
+Corrected how the round-3 build is described in the docs. The app was created, generated,
+and published **programmatically through the OutSystems MCP server** (which delegates model
+changes to Mentor) — not by hand in the Mentor Web UI. Evidence in the record: `app_list`
+tenant search, `create asset`, sending the BRD as the Mentor prompt, structured tool
+outputs (`changeApplied`, `publishSucceeded`, `outcome: success`), and polling/closing the
+Mentor session — all MCP tool calls.
+
+Changes (documentation only):
+- `README.md`: "via OutSystems AI Mentor Web" → "through the OutSystems MCP server, which
+  delegates model changes to Mentor".
+- `00-run-log.md`: section heading "Build (OutSystems AI Mentor Web)" →
+  "Build (via OutSystems MCP server → Mentor)".
+- Left untouched: the BRD authoring note (describes the requirement-document format Mentor
+  expects, not the build tool), steering files, and all code/tests/trackers.
+
+---
+
 ## 2026-10-10 — Read-only verification (typecheck + live/offline test runs)
 
 A read-only check: no files modified, no commits/pushes, no OutSystems MCP or Mentor
@@ -225,7 +244,7 @@ RUN TIMESTAMP (UTC): 2026-10-10T01:21:16Z
 > Tenant hostname and the app/portfolio/environment/publication identifiers are
 > environment-specific and intentionally omitted from this committed log.
 
-### Build (OutSystems AI Mentor Web)
+### Build (via OutSystems MCP server → Mentor)
 | Step | Result |
 |---|---|
 | Create asset EmployeeCatalogMCP3 | OK |
